@@ -1,0 +1,1495 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#000000">
+  <title>The Realm of Scale — C64 Air Edition</title>
+  <style>
+    :root {
+      --ink: #b8ffca;
+      --bright: #effff1;
+      --dim: #659b70;
+      --dark: #07110d;
+      --panel: #091912;
+      --line: #2b6b3e;
+      --amber: #ffd36a;
+      --red: #ff806d;
+      --cyan: #7ce7ff;
+      --shadow: rgba(93, 255, 135, .16);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { min-height: 100%; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 50% 30%, rgba(28, 89, 48, .25), transparent 45%),
+        var(--dark);
+      font-family: "Courier New", Courier, monospace;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,.018) 0,
+        rgba(255,255,255,.018) 1px,
+        transparent 2px,
+        transparent 4px
+      );
+      mix-blend-mode: screen;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 21;
+      pointer-events: none;
+      box-shadow: inset 0 0 120px rgba(0,0,0,.78), inset 0 0 18px rgba(0,0,0,.72);
+    }
+
+    button { font: inherit; }
+
+    .app {
+      min-height: 100vh;
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      padding: clamp(18px, 3vw, 42px);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+      color: var(--dim);
+      font-size: clamp(.7rem, 1.5vw, .9rem);
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .signal::before {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      margin-right: 8px;
+      border-radius: 50%;
+      background: var(--ink);
+      box-shadow: 0 0 10px var(--ink);
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    .screen {
+      flex: 1;
+      display: grid;
+      align-items: center;
+      padding: clamp(24px, 5vh, 64px) 0;
+    }
+
+    .view { display: none; }
+    .view.active { display: block; animation: appear .35s ease-out; }
+
+    .eyebrow {
+      color: var(--amber);
+      font-size: clamp(.72rem, 1.6vw, .92rem);
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    h1, h2, p { margin-top: 0; }
+
+    h1 {
+      max-width: 820px;
+      margin-bottom: 18px;
+      color: var(--bright);
+      font-size: clamp(2.7rem, 8.5vw, 7rem);
+      line-height: .83;
+      letter-spacing: -.08em;
+      text-transform: uppercase;
+      text-shadow: 0 0 22px var(--shadow);
+    }
+
+    h1 span { color: var(--ink); }
+
+    h2 {
+      color: var(--bright);
+      font-size: clamp(1.75rem, 4vw, 3.3rem);
+      line-height: 1.02;
+      letter-spacing: -.045em;
+    }
+
+    .intro-copy {
+      max-width: 740px;
+      color: var(--ink);
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      line-height: 1.65;
+    }
+
+    .blink { animation: blink 1s steps(1) infinite; }
+
+    .primary, .restart {
+      margin-top: 24px;
+      padding: 15px 21px;
+      border: 1px solid var(--ink);
+      color: var(--dark);
+      background: var(--ink);
+      cursor: pointer;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      box-shadow: 0 0 22px var(--shadow);
+      transition: transform .15s ease, background .15s ease;
+    }
+
+    .primary:hover, .primary:focus-visible,
+    .restart:hover, .restart:focus-visible {
+      transform: translateY(-2px);
+      background: var(--bright);
+      outline: 2px solid var(--bright);
+      outline-offset: 4px;
+    }
+
+    .game-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      gap: clamp(28px, 5vw, 72px);
+      align-items: start;
+    }
+
+    .chapter {
+      color: var(--amber);
+      font-size: .84rem;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .story {
+      max-width: 760px;
+      min-height: 7.5em;
+      margin: 22px 0 28px;
+      color: var(--ink);
+      font-size: clamp(1rem, 1.8vw, 1.2rem);
+      line-height: 1.65;
+      white-space: pre-line;
+    }
+
+    .question {
+      max-width: 760px;
+      margin-bottom: 19px;
+      color: var(--bright);
+      font-size: clamp(1.05rem, 2vw, 1.3rem);
+      font-weight: 700;
+      line-height: 1.5;
+    }
+
+    .choices {
+      display: grid;
+      gap: 11px;
+    }
+
+    .choice {
+      width: 100%;
+      padding: 15px 17px;
+      display: grid;
+      grid-template-columns: 30px 1fr;
+      gap: 10px;
+      text-align: left;
+      color: var(--ink);
+      background: rgba(6, 20, 13, .7);
+      border: 1px solid var(--line);
+      cursor: pointer;
+      line-height: 1.35;
+      transition: border-color .15s ease, background .15s ease, transform .15s ease;
+    }
+
+    .choice:hover, .choice:focus-visible {
+      border-color: var(--ink);
+      background: rgba(33, 91, 51, .35);
+      transform: translateX(5px);
+      outline: none;
+    }
+
+    .choice-key { color: var(--amber); font-weight: 700; }
+
+    .status {
+      position: sticky;
+      top: 30px;
+      border: 1px solid var(--line);
+      background: rgba(8, 24, 16, .72);
+      padding: 20px;
+      box-shadow: 0 0 35px rgba(0,0,0,.25);
+    }
+
+    .status-title {
+      margin-bottom: 18px;
+      color: var(--dim);
+      font-size: .72rem;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    .meter { margin-bottom: 20px; }
+    .meter:last-child { margin-bottom: 0; }
+
+    .meter-head {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 7px;
+      font-size: .86rem;
+    }
+
+    .meter-value { color: var(--bright); }
+
+    .track {
+      height: 10px;
+      padding: 2px;
+      border: 1px solid var(--line);
+    }
+
+    .fill {
+      height: 100%;
+      width: 50%;
+      background: var(--ink);
+      box-shadow: 0 0 10px var(--shadow);
+      transition: width .7s cubic-bezier(.2,.8,.2,1), background .25s ease;
+    }
+
+    .fill.mid { background: var(--amber); }
+    .fill.low { background: var(--red); }
+
+    .progress-dots {
+      display: flex;
+      gap: 8px;
+      margin-top: 25px;
+    }
+
+    .dot {
+      height: 5px;
+      flex: 1;
+      background: #173522;
+    }
+    .dot.done { background: var(--ink); box-shadow: 0 0 8px var(--shadow); }
+    .dot.current { background: var(--amber); }
+
+    .consequence-box {
+      max-width: 800px;
+      padding-left: 22px;
+      border-left: 3px solid var(--amber);
+    }
+
+    .consequence-text {
+      color: var(--bright);
+      font-size: clamp(1.25rem, 3vw, 2rem);
+      line-height: 1.45;
+    }
+
+    .delta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+      margin: 25px 0 10px;
+      color: var(--amber);
+      font-size: .92rem;
+      text-transform: uppercase;
+    }
+
+    .continue-hint { color: var(--dim); font-size: .85rem; }
+
+    .ending-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
+      gap: clamp(32px, 6vw, 88px);
+      align-items: center;
+    }
+
+    .ending-title { color: var(--amber); }
+
+    .ending-copy {
+      max-width: 680px;
+      font-size: clamp(1rem, 1.8vw, 1.2rem);
+      line-height: 1.65;
+    }
+
+    .score-card {
+      border: 1px solid var(--line);
+      padding: 24px;
+      background: rgba(8, 24, 16, .76);
+    }
+
+    .score-card .meter { margin-bottom: 24px; }
+
+    .reality {
+      margin-top: 26px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+      color: var(--cyan);
+      font-size: .9rem;
+      line-height: 1.5;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+      color: #477554;
+      font-size: .68rem;
+      letter-spacing: .11em;
+      text-transform: uppercase;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @keyframes blink { 50% { opacity: 0; } }
+    @keyframes pulse { 50% { opacity: .35; } }
+    @keyframes appear {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 760px) {
+      .game-layout, .ending-layout { grid-template-columns: 1fr; }
+      .status { position: static; order: -1; }
+      .story { min-height: auto; }
+      .footer span:last-child { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+    .air-summary {
+  margin-top: clamp(48px, 8vh, 90px);
+  padding-top: clamp(36px, 6vh, 64px);
+  border-top: 1px solid var(--line);
+}
+
+.air-summary > h2 {
+  max-width: 850px;
+  margin-bottom: 18px;
+}
+
+.air-summary-lead {
+  max-width: 780px;
+  color: var(--bright);
+  font-size: clamp(1.15rem, 2.4vw, 1.65rem);
+  line-height: 1.5;
+}
+
+.air-summary-intro {
+  margin: 38px 0 18px;
+  color: var(--dim);
+  font-size: 0.85rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.air-levels {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.air-level {
+  min-height: 220px;
+  padding: 22px;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--line);
+}
+
+.air-level-number {
+  margin-bottom: 32px;
+  color: var(--amber);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+}
+
+.air-level h3 {
+  margin: 0 0 14px;
+  color: var(--bright);
+  font-size: clamp(1.05rem, 2vw, 1.35rem);
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.air-level p {
+  margin: 0;
+  line-height: 1.55;
+}
+
+.air-summary-message {
+  max-width: 850px;
+  margin-top: 34px;
+  color: var(--ink);
+  font-size: clamp(1rem, 1.8vw, 1.2rem);
+  line-height: 1.55;
+}
+
+.air-summary-message p {
+  margin-bottom: 10px;
+}
+
+.air-summary-cta {
+  max-width: 900px;
+  margin: 38px 0 0;
+  color: var(--amber);
+  font-size: clamp(1.35rem, 3.2vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+.air-summary .restart {
+  margin-top: 32px;
+}
+
+.air-summary .continue-hint {
+  margin-top: 16px;
+}
+
+@media (max-width: 760px) {
+  .air-levels {
+    grid-template-columns: 1fr;
+  }
+
+  .air-level {
+    min-height: auto;
+  }
+
+  .air-level-number {
+    margin-bottom: 18px;
+  }
+}
+
+/* Commodore 64-inspired JetBrains Air theme */
+:root {
+  --ink: #eeede9;
+  --bright: #ffffff;
+  --dim: #9ba9a7;
+  --dark: #000000;
+  --panel: #061011;
+  --line: #14636f;
+  --amber: #73bdc7;
+  --red: #ff6b7a;
+  --cyan: #73bdc7;
+  --shadow: rgba(20, 99, 111, .42);
+}
+
+html {
+  background: #000;
+}
+
+body {
+  color: #eeede9;
+  background: #000;
+  font-family: "Courier New", Courier, ui-monospace, monospace;
+  font-variant-ligatures: none;
+  letter-spacing: .025em;
+}
+
+body::before {
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(238, 237, 233, .035) 0,
+    rgba(238, 237, 233, .035) 1px,
+    transparent 2px,
+    transparent 5px
+  );
+  mix-blend-mode: normal;
+}
+
+body::after {
+  box-shadow:
+    inset 0 0 100px rgba(0,0,0,.85),
+    inset 0 0 20px rgba(20,99,111,.14);
+}
+
+.app {
+  width: min(1180px, calc(100% - 30px));
+  min-height: calc(100vh - 30px);
+  margin: 15px auto;
+  padding: clamp(20px, 3vw, 42px);
+  border: 8px solid #14636f;
+  outline: 2px solid #eeede9;
+  outline-offset: -13px;
+  background: #000;
+}
+
+.topbar {
+  padding: 10px 12px;
+  color: #eeede9;
+  background: #14636f;
+  border: 0;
+  font-weight: 700;
+  letter-spacing: .12em;
+}
+
+.signal::before {
+  width: 10px;
+  height: 10px;
+  border-radius: 0;
+  background: #eeede9;
+  box-shadow: none;
+}
+
+.screen {
+  padding: clamp(30px, 6vh, 68px) clamp(4px, 2vw, 24px);
+}
+
+.eyebrow,
+.chapter {
+  display: inline-block;
+  padding: 5px 8px;
+  color: #eeede9;
+  background: #14636f;
+  font-weight: 700;
+  letter-spacing: .13em;
+}
+
+h1 {
+  max-width: 900px;
+  color: #eeede9;
+  font-size: clamp(2.8rem, 8.4vw, 7.2rem);
+  line-height: .9;
+  letter-spacing: .015em;
+  text-shadow: 6px 6px 0 #14636f;
+}
+
+h1 span,
+h2,
+.ending-title {
+  color: #eeede9;
+}
+
+h2 {
+  letter-spacing: .01em;
+  text-transform: uppercase;
+  text-shadow: 3px 3px 0 #14636f;
+}
+
+.intro-copy,
+.story,
+.ending-copy,
+.air-summary-lead,
+.air-summary-message {
+  color: #eeede9;
+}
+
+.primary,
+.restart {
+  color: #eeede9;
+  background: #14636f;
+  border: 3px solid #eeede9;
+  border-radius: 0;
+  box-shadow: 6px 6px 0 #eeede9;
+  transition: none;
+}
+
+.primary:hover,
+.primary:focus-visible,
+.restart:hover,
+.restart:focus-visible {
+  color: #000;
+  background: #eeede9;
+  outline: 3px solid #14636f;
+  outline-offset: 4px;
+  transform: translate(3px, 3px);
+  box-shadow: 3px 3px 0 #14636f;
+}
+
+.choice {
+  padding: 17px 18px;
+  color: #eeede9;
+  background: #000;
+  border: 3px solid #14636f;
+  border-radius: 0;
+  transition: none;
+}
+
+.choice:hover,
+.choice:focus-visible {
+  color: #000;
+  background: #eeede9;
+  border-color: #eeede9;
+  outline: 3px solid #14636f;
+  outline-offset: -7px;
+  transform: none;
+}
+
+.choice-key {
+  color: #73bdc7;
+}
+
+.choice:hover .choice-key,
+.choice:focus-visible .choice-key {
+  color: #14636f;
+}
+
+.status,
+.score-card {
+  color: #eeede9;
+  background: #000;
+  border: 4px double #14636f;
+  box-shadow: 8px 8px 0 #14636f;
+}
+
+.status-title {
+  margin: -20px -20px 20px;
+  padding: 9px 12px;
+  color: #eeede9;
+  background: #14636f;
+  font-weight: 700;
+}
+
+.meter-value {
+  color: #eeede9;
+}
+
+.track {
+  height: 14px;
+  padding: 2px;
+  border: 2px solid #eeede9;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0 8px,
+    rgba(238,237,233,.12) 8px 10px
+  );
+}
+
+.fill,
+.fill.mid {
+  background: #14636f;
+  box-shadow: none;
+}
+
+.fill.low {
+  background: #ff6b7a;
+}
+
+.dot {
+  height: 8px;
+  background: #233336;
+}
+
+.dot.done {
+  background: #eeede9;
+  box-shadow: none;
+}
+
+.dot.current {
+  background: #14636f;
+  outline: 1px solid #eeede9;
+}
+
+.consequence-box {
+  padding: 26px;
+  background: #000;
+  border: 4px double #14636f;
+}
+
+.consequence-text {
+  color: #eeede9;
+}
+
+.delta-row,
+.air-summary-cta {
+  color: #73bdc7;
+}
+
+.continue-hint,
+.footer,
+.air-summary-intro {
+  color: #9ba9a7;
+}
+
+.reality {
+  color: #73bdc7;
+  border-top-color: #14636f;
+}
+
+.footer {
+  padding: 12px;
+  border: 0;
+  background: #071819;
+}
+
+.air-summary {
+  border-top: 8px double #14636f;
+}
+
+.air-level {
+  color: #eeede9;
+  background: #000;
+  border: 3px solid #14636f;
+  box-shadow: 6px 6px 0 #14636f;
+}
+
+.air-level-number {
+  display: inline-block;
+  padding: 4px 7px;
+  color: #eeede9;
+  background: #14636f;
+}
+
+.air-level h3 {
+  color: #eeede9;
+  text-shadow: 2px 2px 0 #14636f;
+}
+
+.air-summary-cta {
+  padding: 18px;
+  border: 3px solid #14636f;
+  text-shadow: 2px 2px 0 #000;
+}
+
+@media (max-width: 760px) {
+  .app {
+    width: calc(100% - 16px);
+    min-height: calc(100vh - 16px);
+    margin: 8px;
+    border-width: 5px;
+    outline-offset: -9px;
+  }
+}
+
+/* AIR 64 terminal pass: intentionally flat, rigid and text-led. */
+html,
+body {
+  background: #000;
+}
+
+body {
+  font-size: 18px;
+  line-height: 1.35;
+  letter-spacing: .045em;
+}
+
+body::before {
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(238, 237, 233, .025) 0,
+    rgba(238, 237, 233, .025) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+}
+
+body::after {
+  display: none;
+}
+
+.app {
+  width: min(1080px, calc(100% - 24px));
+  min-height: calc(100vh - 24px);
+  margin: 12px auto;
+  padding: 0;
+  border: 4px solid #14636f;
+  outline: 2px solid #eeede9;
+  outline-offset: -8px;
+}
+
+.topbar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  min-height: 42px;
+  padding: 10px 16px;
+  color: #000;
+  background: #eeede9;
+  border-bottom: 4px solid #14636f;
+  font-size: .78rem;
+  letter-spacing: .08em;
+}
+
+.signal::before {
+  content: "■";
+  width: auto;
+  height: auto;
+  margin-right: 9px;
+  color: #14636f;
+  background: transparent;
+  animation: pulse 1.2s steps(2, end) infinite;
+}
+
+.screen {
+  display: block;
+  width: min(100%, 82ch);
+  margin: 0 auto;
+  padding: clamp(34px, 6vh, 64px) clamp(20px, 5vw, 56px);
+}
+
+.view.active {
+  animation: none;
+}
+
+.eyebrow,
+.chapter {
+  display: table;
+  padding: 3px 7px;
+  color: #000;
+  background: #eeede9;
+  font-size: .78rem;
+  letter-spacing: .08em;
+}
+
+h1 {
+  max-width: none;
+  margin: 28px 0;
+  color: #eeede9;
+  font-size: clamp(2.45rem, 7vw, 5.5rem);
+  line-height: .95;
+  letter-spacing: .04em;
+  text-shadow: none;
+}
+
+h1 span {
+  color: #eeede9;
+}
+
+h2,
+.air-level h3 {
+  letter-spacing: .04em;
+  text-shadow: none;
+}
+
+.intro-copy,
+.story,
+.question,
+.ending-copy,
+.air-summary-lead,
+.air-summary-message,
+.air-level p {
+  line-height: 1.45;
+}
+
+.primary,
+.restart {
+  padding: 8px 10px;
+  color: #000;
+  background: #eeede9;
+  border: 0;
+  box-shadow: none;
+  letter-spacing: .08em;
+}
+
+.primary::before,
+.restart::before {
+  content: "> ";
+}
+
+.primary:hover,
+.primary:focus-visible,
+.restart:hover,
+.restart:focus-visible {
+  color: #eeede9;
+  background: #14636f;
+  outline: 2px solid #eeede9;
+  outline-offset: 2px;
+  transform: none;
+  box-shadow: none;
+}
+
+.game-layout {
+  grid-template-columns: minmax(0, 1fr) 250px;
+  gap: 36px;
+}
+
+.story {
+  min-height: 0;
+  margin: 20px 0;
+}
+
+.choices {
+  gap: 6px;
+}
+
+.choice {
+  padding: 8px 10px;
+  grid-template-columns: 28px 1fr;
+  color: #eeede9;
+  background: #000;
+  border: 0;
+  border-left: 8px solid #14636f;
+}
+
+.choice:hover,
+.choice:focus-visible {
+  color: #000;
+  background: #eeede9;
+  border-color: #eeede9;
+  outline: none;
+}
+
+.choice-key,
+.choice:hover .choice-key,
+.choice:focus-visible .choice-key {
+  color: #14636f;
+}
+
+.status,
+.score-card,
+.consequence-box {
+  padding: 14px;
+  color: #eeede9;
+  background: #000;
+  border: 2px solid #eeede9;
+  box-shadow: none;
+}
+
+.status-title {
+  margin: -14px -14px 16px;
+  padding: 5px 8px;
+  color: #000;
+  background: #eeede9;
+}
+
+.meter {
+  margin-bottom: 16px;
+}
+
+.meter-head {
+  display: block;
+  margin-bottom: 5px;
+  font-size: .72rem;
+}
+
+.meter-value {
+  float: right;
+}
+
+.track {
+  height: 12px;
+  padding: 2px;
+  border: 1px solid #eeede9;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0 7px,
+    #000 7px 9px
+  );
+}
+
+.fill,
+.fill.mid,
+.fill.low {
+  background: #14636f;
+  transition: none;
+}
+
+.progress-dots {
+  gap: 4px;
+}
+
+.dot {
+  height: 6px;
+  background: #000;
+  border: 1px solid #14636f;
+}
+
+.dot.done,
+.dot.current {
+  background: #14636f;
+  outline: 0;
+}
+
+.consequence-box {
+  max-width: 68ch;
+}
+
+#consequenceView.active {
+  min-height: 60vh;
+  cursor: pointer;
+}
+
+.footer.is-hidden {
+  display: none;
+}
+
+.consequence-text {
+  font-size: clamp(1.05rem, 2.2vw, 1.45rem);
+}
+
+.delta-row {
+  padding: 7px;
+  color: #000;
+  background: #eeede9;
+}
+
+.ending-layout {
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 36px;
+  align-items: start;
+}
+
+.reality {
+  border-top: 2px dashed #14636f;
+}
+
+.air-summary {
+  margin-top: 52px;
+  padding-top: 30px;
+  border-top: 4px solid #eeede9;
+}
+
+.air-levels {
+  display: block;
+}
+
+.air-level {
+  min-height: 0;
+  margin: 0 0 8px;
+  padding: 12px;
+  background: #000;
+  border: 0;
+  border-left: 8px solid #14636f;
+  box-shadow: none;
+}
+
+.air-level-number {
+  float: left;
+  margin: 0 12px 6px 0;
+  padding: 2px 5px;
+  color: #000;
+  background: #eeede9;
+}
+
+.air-level h3 {
+  margin-bottom: 7px;
+  font-size: 1rem;
+}
+
+.air-summary-cta {
+  padding: 12px;
+  color: #000;
+  background: #eeede9;
+  border: 0;
+  text-shadow: none;
+  font-size: clamp(1.05rem, 2.3vw, 1.45rem);
+}
+
+.footer {
+  padding: 9px 16px;
+  color: #eeede9;
+  background: #14636f;
+  border-top: 2px solid #eeede9;
+  font-size: .63rem;
+}
+
+@media (max-width: 760px) {
+  body { font-size: 16px; }
+
+  .app {
+    width: calc(100% - 12px);
+    min-height: calc(100vh - 12px);
+    margin: 6px;
+    border-width: 3px;
+    outline-offset: -6px;
+  }
+
+  .topbar { grid-template-columns: 1fr; }
+  .screen { padding: 28px 18px; }
+  .game-layout,
+  .ending-layout { grid-template-columns: 1fr; }
+  .status { position: static; order: -1; }
+}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <span class="signal">World Summit AI // Field Terminal 01</span>
+    </header>
+
+    <section class="screen" aria-live="polite">
+      <div id="startView" class="view active">
+        <div class="eyebrow">An enterprise AI text adventure</div>
+        <h1>The Realm<br><span>of Scale</span></h1>
+        <p class="intro-copy">
+          AI can produce code.<br>
+          Your organization still has to produce software.<br><br>
+          What began as an experiment on individual laptops is spreading across teams, repositories, vendors, and clouds.<br>
+          Productivity is rising. So are costs, complexity, and the amount of work that must be reviewed.<br><br>
+          You have been appointed <strong>Keeper of Agentic Development</strong>.<br>
+          Your mission: expand experimentation without losing quality, context, cost discipline, or human control.<span class="blink">_</span>
+        </p>
+        <button id="startButton" class="primary" type="button">Press Enter to begin</button>
+      </div>
+
+      <div id="gameView" class="view">
+        <div class="game-layout">
+          <div>
+            <div id="chapter" class="chapter"></div>
+            <h2 id="encounterTitle"></h2>
+            <p id="story" class="story"></p> 
+            <p id="question" class="question"></p>
+            <div id="choices" class="choices"></div>
+          </div>
+          <aside class="status" aria-label="Kingdom status">
+            <div class="status-title">Your Kingdom</div>
+            <div id="liveMeters"></div>
+            <div id="progress" class="progress-dots" aria-label="Adventure progress"></div>
+          </aside>
+        </div>
+      </div>
+
+      <div id="consequenceView" class="view">
+        <div class="consequence-box">
+          <div class="eyebrow">The realm responds</div>
+          <p id="consequenceText" class="consequence-text"></p>
+          <div id="deltaRow" class="delta-row"></div>
+          <p class="continue-hint">Press ENTER or tap to continue <span class="blink">_</span></p>
+        </div>
+      </div>
+
+      <div id="endingView" class="view">
+  <div class="ending-layout">
+    <div>
+      <div class="eyebrow">
+        Quest complete // Your leadership archetype
+      </div>
+
+      <h2 id="endingTitle" class="ending-title"></h2>
+      <p id="endingCopy" class="ending-copy"></p>
+
+      <p class="reality">
+        Scaling AI is a continuous balance of developer productivity,
+        cost, and control.
+      </p>
+    </div>
+
+    <div
+      id="finalScores"
+      class="score-card"
+      aria-label="Final scores"
+    ></div>
+  </div>
+
+  <section class="air-summary" aria-labelledby="airSummaryTitle">
+    <div class="eyebrow">Quest complete</div>
+
+    <h2 id="airSummaryTitle">AI can produce code.</h2>
+
+    <p class="air-summary-lead">
+      Your organization still has to produce software that people can
+      understand, verify, secure, and stand behind.
+    </p>
+
+    <p class="air-summary-intro">
+      JetBrains Air supports agentic development at every level:
+    </p>
+
+    <div class="air-levels">
+      <article class="air-level">
+        <div class="air-level-number">01</div>
+        <h3>Air in JetBrains IDEs</h3>
+        <p>
+          Direct and orchestrate agents—and verify their work with
+          JetBrains code intelligence.
+        </p>
+      </article>
+
+      <article class="air-level">
+        <div class="air-level-number">02</div>
+        <h3>Air Teams</h3>
+        <p>
+          Coordinate developers and agents, reuse successful workflows,
+          and automate repeatable work.
+        </p>
+      </article>
+
+      <article class="air-level">
+        <div class="air-level-number">03</div>
+        <h3>Air Governance</h3>
+        <p>
+          Apply organizational policy, visibility, auditability, cost
+          management, and accountability across providers.
+        </p>
+      </article>
+    </div>
+
+    <div class="air-summary-message">
+      <p>Keep the choice of agents, models, and services.</p>
+
+      <p>
+        Bring them together with shared context, one policy layer,
+        and a single view of cost and activity.
+      </p>
+    </div>
+
+    <button id="restartButton" class="restart" type="button">
+      New player
+    </button>
+
+    <p class="continue-hint">
+      Press ENTER to return to the introduction
+      <span class="blink">_</span>
+    </p>
+  </section>
+</div>
+
+    </section>
+
+    <footer class="footer">
+      <span>Use 1–3 to choose // Enter to continue</span>
+      <span>System build 1986.2026</span>
+    </footer>
+  </main>
+
+  <script>
+    const encounters = [
+      {
+        title: "Encounter 1: The clearing of many agents",
+        story: "You enter a misty clearing. A many-headed creature blocks your path. Each head represents a different model, agent, or service. \"Your developers demand the freedom to choose!\" it cries. \"But every new choice brings another account, policy, invoice, and trail of activity.\"",
+        question: "What will you permit?",
+        choices: [
+          { label: "Any tool developers want.", delta: { productivity: 22, cost: -18, control: -20 }, consequence: "Developers rejoice and experimentation flourishes. By nightfall,  the kingdom has five new providers, seven invoices, and no reliable record of which agent accessed the Sacred Codebase." },
+          { label: "Select one provider for the entire kingdom.", delta: { productivity: -8, cost: 14, control: 22 }, consequence: "Order returns to the realm. Yet teams solving different quests begin trading forbidden tools in shadowy corridors. And your strategy is now tied to whichever provider leads the rankings this quarter." },
+          { label: "Support multiple agents through one shared system.", delta: { productivity: 12, cost: 4, control: 14 }, consequence: "Developers retain meaningful choice. Shared context, policies, cost visibility, and activity records remain consistent across the tools they use." }
+        ]
+      },
+      {
+        title: "Encounter 2: The workshop of repeated spells",
+        story: "You enter a crowded workshop. One developer has created a powerful ritual that reviews pull requests and fixes small bugs. It works brilliantly – but only on their laptop, with their prompts, tools, and credentials. The rest of the team wants to use it.",
+        question: "How will you scale what works?",
+        choices: [
+          { label: "Ask every developer to copy the ritual.", delta: { productivity: 10, cost: -8, control: -14 }, consequence: "Adoption spreads quickly. Soon, thirty slightly different versions are running with different instructions, environments, and results." },
+          { label: "Create a central team that runs every agentic task manually.", delta: { productivity: -12, cost: 4, control: 12 }, consequence: "The rituals become more consistent. Unfortunately, the central team is soon buried beneath a mountain of requests, slowing progress across the kingdom." },
+          { label: "Turn the ritual into a shared automation.", delta: { productivity: 15, cost: 8, control: 14 }, consequence: "The team defines the instructions, environment, tools, and trigger once. Every run uses the same setup, the results are visible to the team, and an engineer still decides what gets merged." }
+        ]
+      },
+      {
+        title: "Encounter 3: The mirror of almost-right code",
+        story: "Deep inside the mountain, you discover a mirror displaying a new code change. The code compiles. The tests pass. The agent sounds confident. But the mirror whispers: \"The change is almost right.\" A hidden architectural assumption may cause trouble months from now when it will be far more expensive to fix.",
+        question: "What do you do?",
+        choices: [
+          { label: "Merge it. The tests passed.", delta: { productivity: 18, cost: -12, control: -20 }, consequence: "Delivery accelerates. The hidden assumption enters production and waits patiently for the least convenient moment to reveal itself." },
+          { label: "Require engineers to inspect every generated line manually.", delta: { productivity: -16, cost: -6, control: 18 }, consequence: "The kingdom remains cautious. But every generated change now waits in a long review queue, and much of the promised productivity disappears." },
+          { label: "Combine software intelligence, an activity record, and human review.", delta: { productivity: 11, cost: 6, control: 18 }, consequence: "The reviewer can see what the agent did, understand the affected code, and focus attention where judgment is required. The work is delegated. Accountability is not." }
+        ]
+      },
+      {
+        title: "Encounter 4: The Treasury without a ledger",
+        story: "At last, you reach the royal treasury. The Treasurer is surrounded by invoices, dashboards, cloud bills, and records of agent runs that produced no usable result. \"Our developers say they are faster,\" they say. \"But the costs appear everywhere: model usage, cloud environments, review, rework, security, and infrastructure. How do I know whether agentic development is creating value?\"",
+        question: "What is your answer?",
+        choices: [
+          { label: "Measure token spend alone.", delta: { productivity: 2, cost: 7, control: -10 }, consequence: "The kingdom gains a precise view of one number. Unfortunately, it still cannot see which teams, workflows, or outcomes produced that cost." },
+          { label: "Move everyone to the cheapest available model.", delta: { productivity: -10, cost: 20, control: 4 }, consequence: "The AI bill falls. Complex work slows down, quality becomes uneven, and teams quietly return to unapproved tools." },
+          { label: "Connect spend with teams, agents, activity, and outcomes.", delta: { productivity: 8, cost: 16, control: 13 }, consequence: "The kingdom gains one cost view across providers, along with a record of what happened. Leaders can see where agentic work creates value, where it creates waste, and where policies need to change." }
+        ]
+      }
+    ];
+
+    const endings = {
+      accelerator: {
+        title: "The Wild Accelerator",
+        copy: "Agents and Automations spread quickly across the kingdom, and developers move at legendary speed. But review queues, hidden costs, and fragmented activity are growing just as fast. Your next quest is visibility and accountability."
+      },
+      gatekeeper: {
+        title: "The Iron Gatekeeper",
+        copy: "The realm is orderly, secure, and carefully reviewed. Nothing crosses your gates unnoticed. But experimentation moves slowly, and developers are still waiting for permission to begin their next quest. Your next challenge is enabling progress without surrendering control."
+      },
+      optimizer: {
+        title: "The Ruthless Optimizer",
+        copy: "The royal treasury is under control and every token is accounted for. But difficult work remains unfinished, useful experiments have been constrained, and teams are questioning whether efficiency has come at the expense of value. Your next quest is better outcomes."
+      },
+      orchestrator: {
+        title: "The Master of Scale",
+        copy: "You balanced choice with shared context, reusable workflows, human verification, and one view of cost and activity. Developers, teams, and agents can move quickly without leaving the organization behind. The realm is ready to scale."
+      },
+      pathfinder: {
+        title: "The Pragmatic Pathfinder",
+        copy: "Your strategy is broadly sound, but progress remains uneven. Some teams are scaling successfully while others still rely on manual processes, fragmented tools, or incomplete visibility."
+      },
+      emerging: {
+        title: "The Emerging Orchestrator",
+        copy: "Strong foundations are taking shape across experimentation, control, and cost management. The next step is connecting workflows, verification, and governance into one coherent system."
+      }
+    };
+
+    const state = {
+      index: 0,
+      scores: { productivity: 50, cost: 50, control: 50 },
+      waiting: false,
+      currentChoices: []
+    };
+    const labels = { productivity: "Productivity", cost: "Cost discipline", control: "Organizational control" };
+    const views = [...document.querySelectorAll(".view")];
+    const $ = id => document.getElementById(id);
+
+    function show(id) {
+      views.forEach(v => v.classList.toggle("active", v.id === id));
+      document.querySelector(".footer").classList.toggle("is-hidden", id === "consequenceView");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function clamp(n) { return Math.max(0, Math.min(100, n)); }
+
+    function shuffled(items) {
+      const result = [...items];
+      for (let i = result.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+      }
+      return result;
+    }
+
+    function meterMarkup(key, value) {
+      const level = value < 30 ? "low" : value < 55 ? "mid" : "";
+      return `<div class="meter">
+        <div class="meter-head"><span>${labels[key]}</span><span class="meter-value">${value}</span></div>
+        <div class="track"><div class="fill ${level}" style="width:${value}%"></div></div>
+      </div>`;
+    }
+
+    function renderMeters(target) {
+      target.innerHTML = Object.entries(state.scores).map(([k, v]) => meterMarkup(k, v)).join("");
+    }
+
+    function renderProgress() {
+      $("progress").innerHTML = encounters.map((_, i) =>
+        `<span class="dot ${i < state.index ? "done" : i === state.index ? "current" : ""}"></span>`
+      ).join("");
+    }
+
+    function start() {
+      state.index = 0;
+      state.scores = { productivity: 50, cost: 50, control: 50 };
+      state.waiting = false;
+      state.currentChoices = [];
+      renderEncounter();
+      show("gameView");
+    }
+
+    function renderEncounter() {
+      const e = encounters[state.index];
+      $("chapter").textContent = `Encounter ${String(state.index + 1).padStart(2, "0")} / ${String(encounters.length).padStart(2, "0")}`;
+      $("encounterTitle").textContent = e.title;
+      $("story").textContent = e.story;
+      $("question").textContent = e.question;
+      state.currentChoices = shuffled(e.choices);
+      $("choices").innerHTML = state.currentChoices.map((choice, i) =>
+        `<button class="choice" type="button" data-choice="${i}"><span class="choice-key">${i + 1}.</span><span>${choice.label}</span></button>`
+      ).join("");
+      document.querySelectorAll(".choice").forEach(button => {
+        button.addEventListener("click", () => choose(Number(button.dataset.choice)));
+      });
+      renderMeters($("liveMeters"));
+      renderProgress();
+    }
+
+    function signed(n) { return `${n > 0 ? "+" : ""}${n}`; }
+
+    function choose(choiceIndex) {
+      if (state.waiting) return;
+      const choice = state.currentChoices[choiceIndex];
+      Object.entries(choice.delta).forEach(([key, value]) => {
+        state.scores[key] = clamp(state.scores[key] + value);
+      });
+      $("consequenceText").textContent = choice.consequence;
+      $("deltaRow").innerHTML = Object.entries(choice.delta)
+        .map(([key, value]) => `<span>${labels[key]} ${signed(value)}</span>`).join("");
+      state.waiting = true;
+      show("consequenceView");
+    }
+
+    function continueQuest() {
+      if (!state.waiting) return;
+      state.waiting = false;
+      state.index += 1;
+      if (state.index >= encounters.length) finish();
+      else {
+        renderEncounter();
+        show("gameView");
+      }
+    }
+
+    function finish() {
+      const { productivity, cost, control } = state.scores;
+      const values = [productivity, cost, control];
+      const average = values.reduce((sum, value) => sum + value, 0) / values.length;
+      const spread = Math.max(...values) - Math.min(...values);
+      let type;
+      if (average >= 82 && spread <= 20) {
+        type = "orchestrator";
+      } else if (average >= 68 && spread <= 28) {
+        type = "emerging";
+      } else if (spread <= 28) {
+        type = "pathfinder";
+      } else {
+        if (productivity === Math.max(productivity, cost, control)) type = "accelerator";
+        else if (control === Math.max(productivity, cost, control)) type = "gatekeeper";
+        else type = "optimizer";
+      }
+      $("endingTitle").textContent = endings[type].title;
+      $("endingCopy").textContent = endings[type].copy;
+      renderMeters($("finalScores"));
+      show("endingView");
+    }
+
+        function returnToIntroduction() {
+  state.index = 0;
+  state.waiting = false;
+  show("startView");
+}
+
+$("startButton").addEventListener("click", start);
+$("restartButton").addEventListener("click", returnToIntroduction);
+document.querySelector(".screen").addEventListener("click", () => {
+  if ($("consequenceView").classList.contains("active")) continueQuest();
+});
+
+document.addEventListener("keydown", event => {
+  if (
+    $("startView").classList.contains("active") &&
+    event.key === "Enter"
+  ) {
+    event.preventDefault();
+    start();
+  } else if (
+    $("consequenceView").classList.contains("active") &&
+    (event.key === "Enter" || event.key === " ")
+  ) {
+    event.preventDefault();
+    continueQuest();
+  } else if (
+    $("endingView").classList.contains("active") &&
+    event.key === "Enter"
+  ) {
+    event.preventDefault();
+    returnToIntroduction();
+  } else if (
+    $("gameView").classList.contains("active") &&
+    ["1", "2", "3"].includes(event.key)
+  ) {
+    choose(Number(event.key) - 1);
+  }
+});
+  </script>
+</body>
+</html>
