@@ -5,6 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#000000">
   <title>The Realm of Scale — C64 Air Edition</title>
+  <meta name="description" content="A text adventure about scaling agentic development. Four encounters, three trade-offs. Which Keeper are you?">
+
+  <!-- Social preview: URLs assume GitHub Pages at beatriz-facchini.github.io/realm-of-scale/ with og-image.png next to index.html -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="The Realm of Scale — which Keeper of Agentic Development are you?">
+  <meta property="og:description" content="Four encounters. Productivity, cost, control. Find your leadership archetype.">
+  <meta property="og:url" content="https://beatriz-facchini.github.io/realm-of-scale/">
+  <meta property="og:image" content="https://beatriz-facchini.github.io/realm-of-scale/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="The Realm of Scale — which Keeper are you?">
+  <meta name="twitter:description" content="Four encounters. Productivity, cost, control. Find your leadership archetype.">
+  <meta name="twitter:image" content="https://beatriz-facchini.github.io/realm-of-scale/og-image.png">
   <style>
     :root {
       --ink: #b8ffca;
@@ -1118,6 +1132,135 @@ h2,
   .ending-layout { grid-template-columns: 1fr; }
   .status { position: static; order: -1; }
 }
+
+/* Shareable result card */
+.share-section {
+  margin-top: 44px;
+  padding-top: 28px;
+  border-top: 4px solid #eeede9;
+}
+
+.share-section h2 { margin-bottom: 10px; }
+
+.share-lead {
+  max-width: 68ch;
+  margin-bottom: 18px;
+  color: #9ba9a7;
+}
+
+.format-toggle {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.format-btn {
+  padding: 6px 10px;
+  color: #eeede9;
+  background: #000;
+  border: 0;
+  border-left: 8px solid #14636f;
+  cursor: pointer;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  font-size: .78rem;
+}
+
+.format-btn[aria-pressed="true"],
+.format-btn:hover,
+.format-btn:focus-visible {
+  color: #000;
+  background: #eeede9;
+  border-color: #eeede9;
+  outline: none;
+}
+
+.share-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 360px);
+  gap: 28px;
+  align-items: start;
+}
+
+.card-preview {
+  border: 2px solid #eeede9;
+  padding: 8px;
+  background: #000;
+  line-height: 0;
+}
+
+.card-preview canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.share-actions { display: grid; gap: 8px; }
+
+.share-actions .share-btn {
+  padding: 9px 12px;
+  text-align: left;
+  color: #000;
+  background: #eeede9;
+  border: 0;
+  cursor: pointer;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  font-size: .8rem;
+}
+
+.share-actions .share-btn::before { content: "> "; }
+
+.share-actions .share-btn.secondary {
+  color: #eeede9;
+  background: #000;
+  border-left: 8px solid #14636f;
+}
+
+.share-actions .share-btn:hover,
+.share-actions .share-btn:focus-visible {
+  color: #eeede9;
+  background: #14636f;
+  outline: 2px solid #eeede9;
+  outline-offset: 2px;
+}
+
+.caption-label {
+  margin: 14px 0 6px;
+  color: #9ba9a7;
+  font-size: .72rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+#shareCaption {
+  width: 100%;
+  min-height: 150px;
+  padding: 10px;
+  resize: vertical;
+  color: #eeede9;
+  background: #000;
+  border: 2px solid #14636f;
+  border-radius: 0;
+  font: inherit;
+  font-size: .82rem;
+  line-height: 1.4;
+}
+
+#shareCaption:focus { outline: 2px solid #eeede9; outline-offset: 2px; }
+
+.share-status {
+  min-height: 1.4em;
+  margin-top: 8px;
+  color: #73bdc7;
+  font-size: .8rem;
+}
+
+@media (max-width: 760px) {
+  .share-layout { grid-template-columns: 1fr; }
+}
   </style>
 </head>
 <body>
@@ -1189,6 +1332,38 @@ h2,
       aria-label="Final scores"
     ></div>
   </div>
+
+  <section class="share-section" aria-labelledby="shareTitle">
+    <div class="eyebrow">Share your result</div>
+    <h2 id="shareTitle">Show your realm</h2>
+    <p class="share-lead">
+      Download your archetype card and post it, or copy the caption below.
+    </p>
+
+    <div class="format-toggle" role="group" aria-label="Card format">
+      <button type="button" class="format-btn" data-format="square" aria-pressed="true">Square 1080&times;1080</button>
+      <button type="button" class="format-btn" data-format="landscape" aria-pressed="false">Wide 1200&times;630</button>
+    </div>
+
+    <div class="share-layout">
+      <div class="card-preview">
+        <canvas id="shareCanvas" width="1080" height="1080" aria-label="Your shareable archetype card"></canvas>
+      </div>
+
+      <div>
+        <div class="share-actions">
+          <button type="button" class="share-btn" id="shareNative">Share card</button>
+          <button type="button" class="share-btn secondary" id="downloadCard">Download PNG</button>
+          <button type="button" class="share-btn secondary" id="copyCaption">Copy caption</button>
+          <button type="button" class="share-btn secondary" id="postLinkedIn">Post on LinkedIn</button>
+          <button type="button" class="share-btn secondary" id="postX">Post on X</button>
+        </div>
+        <div class="caption-label">Caption (editable)</div>
+        <textarea id="shareCaption" aria-label="Post caption"></textarea>
+        <div id="shareStatus" class="share-status" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
 
   <section class="air-summary" aria-labelledby="airSummaryTitle">
     <div class="eyebrow">Quest complete</div>
@@ -1449,8 +1624,294 @@ h2,
       $("endingTitle").textContent = endings[type].title;
       $("endingCopy").textContent = endings[type].copy;
       renderMeters($("finalScores"));
+      initShare(type);
       show("endingView");
     }
+
+
+    /* ---------- Shareable result card ---------- */
+    const cardCopy = {
+      accelerator:  "Legendary speed. Review queues and hidden costs are growing just as fast.",
+      gatekeeper:   "Orderly and secure. Developers are still waiting at the gate.",
+      optimizer:    "Every token accounted for. Real value left on the table.",
+      orchestrator: "Choice, shared context, verification, and cost in one view. Ready to scale.",
+      pathfinder:   "Sound strategy, uneven progress. Some teams scale, others still run on manual work.",
+      emerging:     "Strong foundations. Next: connect workflows, verification, and governance."
+    };
+
+    const shareState = { format: "square", type: null };
+    const C = { bg: "#000000", teal: "#14636f", cream: "#eeede9", light: "#73bdc7", dim: "#9ba9a7" };
+    const MONO = '"Courier New", Courier, ui-monospace, monospace';
+
+    function wrapLines(ctx, text, maxWidth) {
+      const words = text.split(" ");
+      const lines = [];
+      let line = "";
+      words.forEach(word => {
+        const test = line ? line + " " + word : word;
+        if (ctx.measureText(test).width > maxWidth && line) {
+          lines.push(line);
+          line = word;
+        } else {
+          line = test;
+        }
+      });
+      if (line) lines.push(line);
+      return lines;
+    }
+
+    function drawMeterRow(ctx, label, value, x, y, width, labelSize, barH) {
+      ctx.font = `bold ${labelSize}px ${MONO}`;
+      ctx.fillStyle = C.cream;
+      ctx.textBaseline = "alphabetic";
+      ctx.textAlign = "left";
+      ctx.fillText(label.toUpperCase(), x, y);
+      ctx.textAlign = "right";
+      ctx.fillText(String(value), x + width, y);
+      ctx.textAlign = "left";
+
+      const barY = y + Math.round(labelSize * 0.45);
+      ctx.strokeStyle = C.cream;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x, barY, width, barH);
+
+      const inner = width - 12;
+      const block = Math.max(8, Math.round(barH * 0.55));
+      const gap = 4;
+      const filled = (inner * value) / 100;
+      ctx.fillStyle = value < 30 ? "#ff6b7a" : C.light;
+      for (let bx = 0; bx + block <= filled + 0.5; bx += block + gap) {
+        ctx.fillRect(x + 6 + bx, barY + 6, block, barH - 12);
+      }
+    }
+
+    function drawCard(canvas, format, typeKey) {
+      const square = format === "square";
+      const w = square ? 1080 : 1200;
+      const h = square ? 1080 : 630;
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      const e = endings[typeKey];
+      const sc = state.scores;
+
+      // background + frame
+      ctx.fillStyle = C.bg;
+      ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = C.teal;
+      ctx.lineWidth = 16;
+      ctx.strokeRect(8, 8, w - 16, h - 16);
+      ctx.strokeStyle = C.cream;
+      ctx.lineWidth = 3;
+      ctx.strokeRect(24, 24, w - 48, h - 48);
+
+      // scanlines
+      ctx.fillStyle = "rgba(238,237,233,.035)";
+      for (let y = 28; y < h - 28; y += 5) ctx.fillRect(28, y, w - 56, 1);
+
+      const pad = square ? 60 : 56;
+      const innerW = w - pad * 2;
+
+      // top bar
+      const barH = square ? 64 : 48;
+      const barTop = square ? 52 : 44;
+      ctx.fillStyle = C.cream;
+      ctx.fillRect(pad, barTop, innerW, barH);
+      ctx.fillStyle = "#000";
+      ctx.font = `bold ${square ? 24 : 19}px ${MONO}`;
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "left";
+      ctx.fillText("■ WORLD SUMMIT AI // FIELD TERMINAL 01", pad + 16, barTop + barH / 2 + 1);
+
+      // footer bar
+      const footH = square ? 56 : 44;
+      const footTop = h - (square ? 52 : 44) - footH;
+      ctx.fillStyle = C.teal;
+      ctx.fillRect(pad, footTop, innerW, footH);
+      ctx.fillStyle = C.cream;
+      ctx.font = `bold ${square ? 22 : 18}px ${MONO}`;
+      ctx.textBaseline = "middle";
+      ctx.fillText("JETBRAINS AIR // WHICH KEEPER ARE YOU?", pad + 16, footTop + footH / 2 + 1);
+
+      ctx.textBaseline = "alphabetic";
+
+      // eyebrow
+      const eyeSize = square ? 24 : 18;
+      const eyeTop = barTop + barH + (square ? 34 : 22);
+      const eyeText = "THE REALM OF SCALE // MY ARCHETYPE";
+      ctx.font = `bold ${eyeSize}px ${MONO}`;
+      const eyeW = ctx.measureText(eyeText).width + 20;
+      ctx.fillStyle = C.teal;
+      ctx.fillRect(pad, eyeTop, eyeW, eyeSize + 14);
+      ctx.fillStyle = C.cream;
+      ctx.fillText(eyeText, pad + 10, eyeTop + eyeSize + 1);
+
+      const titleText = e.title.toUpperCase();
+      const metersX = square ? pad : 740;
+      const metersW = square ? innerW : w - 740 - pad;
+      const textW = square ? innerW : 620;
+
+      // title (shrink until it fits in 2 lines max)
+      let titleSize = square ? 108 : 70;
+      let titleLines;
+      do {
+        ctx.font = `bold ${titleSize}px ${MONO}`;
+        titleLines = wrapLines(ctx, titleText, textW);
+        if (titleLines.length <= 2) break;
+        titleSize -= 4;
+      } while (titleSize > 40);
+      const titleLead = Math.round(titleSize * 1.05);
+      let y = eyeTop + eyeSize + 14 + (square ? 40 : 26) + titleSize * 0.8;
+      titleLines.forEach(line => {
+        ctx.fillStyle = C.teal;
+        ctx.fillText(line, pad + (square ? 6 : 5), y + (square ? 6 : 5));
+        ctx.fillStyle = C.cream;
+        ctx.fillText(line, pad, y);
+        y += titleLead;
+      });
+
+      // tagline
+      const tagSize = square ? 34 : 24;
+      ctx.font = `${tagSize}px ${MONO}`;
+      ctx.fillStyle = C.light;
+      y += square ? 6 : 0;
+      wrapLines(ctx, cardCopy[typeKey], textW).forEach(line => {
+        ctx.fillText(line, pad, y);
+        y += Math.round(tagSize * 1.35);
+      });
+
+      // meters
+      const rows = [
+        ["Productivity", sc.productivity],
+        ["Cost discipline", sc.cost],
+        [square ? "Organizational control" : "Org. control", sc.control]
+      ];
+      if (square) {
+        const rowGap = 92;
+        const startY = footTop - 84 - rowGap * 2;
+        ctx.fillStyle = C.cream;
+        ctx.fillRect(pad, startY - 56, innerW, 3);
+        rows.forEach((r, i) => drawMeterRow(ctx, r[0], r[1], metersX, startY + i * rowGap, metersW, 24, 30));
+      } else {
+        const rowGap = 92;
+        const startY = 210;
+        ctx.strokeStyle = C.cream;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(metersX - 20, startY - 56, metersW + 40, rowGap * 3 + 16);
+        rows.forEach((r, i) => drawMeterRow(ctx, r[0], r[1], metersX, startY + i * rowGap, metersW, 19, 26));
+      }
+    }
+
+    function shareUrl() {
+      return /^https?:/.test(location.protocol) ? location.href.split("#")[0] : "";
+    }
+
+    function buildCaption(typeKey) {
+      const e = endings[typeKey];
+      const sc = state.scores;
+      const url = shareUrl();
+      return [
+        `I just played The Realm of Scale and became ${e.title}.`,
+        `Productivity ${sc.productivity} · Cost discipline ${sc.cost} · Control ${sc.control}`,
+        "",
+        "Four encounters on scaling agentic development. Which Keeper are you?",
+        url,
+        "#JetBrainsAir #WorldSummitAI"
+      ].filter((line, i, arr) => line !== "" || arr[i - 1] !== "").join("\n").replace(/\n{3,}/g, "\n\n").trim();
+    }
+
+    function renderShareCard() {
+      drawCard($("shareCanvas"), shareState.format, shareState.type);
+    }
+
+    function setShareStatus(msg) {
+      $("shareStatus").textContent = msg;
+    }
+
+    function initShare(typeKey) {
+      shareState.type = typeKey;
+      $("shareCaption").value = buildCaption(typeKey);
+      setShareStatus("");
+      renderShareCard();
+    }
+
+    function canvasBlob() {
+      return new Promise(resolve => $("shareCanvas").toBlob(resolve, "image/png"));
+    }
+
+    function fileName() {
+      return `realm-of-scale-${shareState.type}-${shareState.format}.png`;
+    }
+
+    async function downloadCard() {
+      const blob = await canvasBlob();
+      if (!blob) return setShareStatus("Could not create the image.");
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = fileName();
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+      setShareStatus("Card downloaded. Attach it to your post.");
+    }
+
+    async function copyCaption() {
+      const text = $("shareCaption").value;
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (err) {
+        $("shareCaption").select();
+        document.execCommand("copy");
+      }
+      setShareStatus("Caption copied.");
+    }
+
+    async function shareNative() {
+      const text = $("shareCaption").value;
+      const blob = await canvasBlob();
+      const file = blob && new File([blob], fileName(), { type: "image/png" });
+      try {
+        if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], text });
+          return;
+        }
+        if (navigator.share) {
+          await navigator.share({ text });
+          setShareStatus("Shared text only. Download the card to attach the image.");
+          return;
+        }
+      } catch (err) {
+        if (err && err.name === "AbortError") return;
+      }
+      await downloadCard();
+      await copyCaption();
+      setShareStatus("Card downloaded and caption copied. Paste both into your post.");
+    }
+
+    async function postTo(network) {
+      const text = $("shareCaption").value;
+      await copyCaption();
+      const url = network === "x"
+        ? "https://twitter.com/intent/tweet?text=" + encodeURIComponent(text)
+        : "https://www.linkedin.com/feed/?shareActive=true&text=" + encodeURIComponent(text);
+      window.open(url, "_blank", "noopener");
+      setShareStatus("Caption copied. Download the card and attach it to your post.");
+    }
+
+    document.querySelectorAll(".format-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        shareState.format = btn.dataset.format;
+        document.querySelectorAll(".format-btn").forEach(b =>
+          b.setAttribute("aria-pressed", String(b === btn)));
+        renderShareCard();
+      });
+    });
+    $("downloadCard").addEventListener("click", downloadCard);
+    $("copyCaption").addEventListener("click", copyCaption);
+    $("shareNative").addEventListener("click", shareNative);
+    $("postLinkedIn").addEventListener("click", () => postTo("linkedin"));
+    $("postX").addEventListener("click", () => postTo("x"));
 
         function returnToIntroduction() {
   state.index = 0;
@@ -1460,7 +1921,8 @@ h2,
 
 $("startButton").addEventListener("click", start);
 $("restartButton").addEventListener("click", returnToIntroduction);
-document.querySelector(".screen").addEventListener("click", () => {
+document.querySelector(".screen").addEventListener("click", event => {
+  if (event.target.closest(".choice")) return;
   if ($("consequenceView").classList.contains("active")) continueQuest();
 });
 
@@ -1479,7 +1941,8 @@ document.addEventListener("keydown", event => {
     continueQuest();
   } else if (
     $("endingView").classList.contains("active") &&
-    event.key === "Enter"
+    event.key === "Enter" &&
+    !event.target.closest("button, textarea")
   ) {
     event.preventDefault();
     returnToIntroduction();
