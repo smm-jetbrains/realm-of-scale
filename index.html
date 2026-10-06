@@ -1604,6 +1604,18 @@ h2,
       }
     }
 
+    function trackResult(type) {
+      try {
+        if (window.goatcounter && window.goatcounter.count) {
+          window.goatcounter.count({
+            path: "realm-of-scale/result/" + type,
+            title: endings[type].title,
+            event: true
+          });
+        }
+      } catch (err) { /* analytics must never break the game */ }
+    }
+
     function finish() {
       const { productivity, cost, control } = state.scores;
       const values = [productivity, cost, control];
@@ -1625,6 +1637,7 @@ h2,
       $("endingCopy").textContent = endings[type].copy;
       renderMeters($("finalScores"));
       initShare(type);
+      trackResult(type);
       show("endingView");
     }
 
@@ -1954,5 +1967,9 @@ document.addEventListener("keydown", event => {
   }
 });
   </script>
+  <!-- GoatCounter: counts only the final archetype (no page views, no cookies) -->
+  <script data-goatcounter="https://smm-jetbrains.goatcounter.com/count"
+          data-goatcounter-settings='{"no_onload": true}'
+          async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
